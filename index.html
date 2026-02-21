@@ -484,44 +484,50 @@
       pdf.save(`passport_photos_${currentSheet}_copies.pdf`);
     }
 
-    // Generate Word document - only images, same size, exact format (no table)
+    // Word dimensions in inches (exact box format: 1.29" x 1.75" for 35x45)
+    function getWordDimensionsInches() {
+      if (currentSize === '35x45') return { w: 1.29, h: 1.75 };
+      if (currentSize === '2x2') return { w: 2, h: 2 };
+      return { w: customW / 25.4, h: customH / 25.4 };
+    }
+
+    // Generate Word document - exact box format: 1.29" x 1.75", 6 in 1 row with gap
     function generateWordDoc() {
       if (!originalImage) return;
       
       const photoCanvas = generatePhotoCanvas();
       if (!photoCanvas) return;
       
-      let photoWidthMm, photoHeightMm;
-      if (currentSize === '35x45') { photoWidthMm = 35; photoHeightMm = 45; }
-      else if (currentSize === '2x2') { photoWidthMm = 51; photoHeightMm = 51; }
-      else if (currentSize === 'custom') { photoWidthMm = customW; photoHeightMm = customH; }
-      
-      const { cols, rows } = getLayout(photoWidthMm, photoHeightMm, currentSheet);
-      const gapMm = getGapMm(photoWidthMm, cols, currentSheet);
+      const dim = getWordDimensionsInches();
+      const { cols, rows } = getLayout(dim.w * 25.4, dim.h * 25.4, currentSheet);
+      const gapIn = 0.08;
       const imgData = photoCanvas.toDataURL('image/jpeg', 0.95);
       
-      // Only images, no table - same photo same size, exact format for Word
-      const imgStyle = `width:${photoWidthMm}mm;height:${photoHeightMm}mm;display:inline-block;vertical-align:top;object-fit:cover;`;
+      // Exact box format: width 1.29", height 1.75" - same as user's manual format
+      const imgStyle = `width:${dim.w}in;height:${dim.h}in;display:inline-block;vertical-align:top;object-fit:cover;`;
       let bodyContent = '';
       for (let row = 0; row < rows; row++) {
-        bodyContent += `<div style="margin-bottom:${row < rows - 1 ? gapMm : 0}mm;">`;
+        bodyContent += `<p style="margin:0 0 ${row < rows - 1 ? gapIn : 0}in 0;">`;
         for (let col = 0; col < cols; col++) {
           const index = row * cols + col;
           if (index >= currentSheet) break;
-          const marginRight = col < cols - 1 ? gapMm : 0;
-          bodyContent += `<img src="${imgData}" alt="Photo ${index+1}" style="${imgStyle}margin-right:${marginRight}mm;" />`;
+          const marginRight = col < cols - 1 ? gapIn : 0;
+          bodyContent += `<img src="${imgData}" style="${imgStyle}margin-right:${marginRight}in;" />`;
         }
-        bodyContent += '</div>';
+        bodyContent += '</p>';
       }
       
       const htmlContent = `<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
   <meta charset="UTF-8">
-  <title>Passport Size Photos - ${currentSheet} Copies</title>
+  <meta name="ProgId" content="Word.Document">
+  <meta name="Generator" content="Microsoft Word">
+  <title>Passport Photos - ${currentSheet} Copies</title>
   <style>
-    body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    img { width: ${photoWidthMm}mm; height: ${photoHeightMm}mm; }
+    body { margin: 0; padding: 0; font-family: Calibri, Arial, sans-serif; font-size: 11pt; }
+    p { margin: 0; }
+    img { width: ${dim.w}in; height: ${dim.h}in; }
   </style>
 </head>
 <body>
