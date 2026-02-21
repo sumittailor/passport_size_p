@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <!-- SEO META -->
+  <title>Free Passport Size Photo Maker Online (India) – Auto Background Remove</title>
+  <meta name="description" content="Instant passport photo maker for Indian govt forms, Aadhaar, PAN, visa, exams. Auto background remove & A4 sheet with 4,6,8,12 copies. 100% free, mobile friendly.">
+  <meta name="keywords" content="passport size photo maker, background remove, India passport photo, 35x45 mm photo, A4 sheet photo, online photo editor">
+  <meta name="author" content="PassportPhoto India">
+  <!-- Open Graph -->
+  <meta property="og:title" content="Free Passport Size Photo Maker Online (India) – Auto Background Remove">
+  <meta property="og:description" content="Create govt-ready photos: auto background removal, resize to 35x45mm, 2x2 inch, A4 sheet layouts. No upload stored.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.passportphotoindia.com">
+  <!-- Canonical suggestion -->
+  <link rel="canonical" href="https://www.passportphotoindia.com/">
+  <!-- jsPDF library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- FileSaver.js for Word document -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <!-- JSZip for Word document generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- html-docx-js for proper DOCX format -->
+  <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
+  <style>
+    /* RESET & GLOBAL */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; }
+    body { background: #f0f5fe; color: #1a2b4c; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+    /* mobile-first container */
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 16px; }
+    /* sticky bottom bar mobile */
+    .sticky-download-mobile { position: sticky; bottom: 0; z-index: 10; background: white; box-shadow: 0 -4px 12px rgba(0,20,80,0.1); padding: 12px 16px; display: flex; justify-content: center; border-radius: 40px 40px 0 0; margin-top: 12px; backdrop-filter: blur(4px); }
+    .sticky-download-mobile .btn { flex: 1; max-width: 300px; margin: 0; box-shadow: 0 4px 10px rgba(0,102,204,0.3); }
+
+    /* GRADIENT HERO */
+    .hero { background: linear-gradient(145deg, #e2edff, #ffffff); border-radius: 32px; padding: 32px 20px; margin: 8px 0 24px; box-shadow: 0 12px 30px -8px rgba(0,70,150,0.2); text-align: center; }
+    h1 { font-size: 2rem; font-weight: 700; line-height: 1.2; color: #0a2540; max-width: 800px; margin: 0 auto 8px; }
+    .subhead { font-size: 1.1rem; color: #1f3a5f; opacity: 0.9; margin-bottom: 16px; }
+
+    /* TRUST BADGES */
+    .trust-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin: 24px 0 12px; font-weight: 500; }
+    .trust-item { display: flex; align-items: center; gap: 6px; background: white; padding: 6px 18px; border-radius: 40px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); font-size: 0.9rem; color: #035c8f; }
+    .trust-item::before { content: "✓"; font-weight: bold; color: #0a7e3a; background: #e0ffe6; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+
+    /* UPLOAD AREA (DRAG & DROP) */
+    .upload-area { background: white; border: 2px dashed #a0c4ff; border-radius: 40px; padding: 32px 20px; text-align: center; cursor: pointer; transition: border 0.2s, background 0.2s; box-shadow: 0 6px 14px rgba(50, 80, 130, 0.06); margin-bottom: 24px; }
+    .upload-area:hover, .upload-area.dragover { border-color: #1e6df2; background: #f2f7ff; }
+    .upload-icon { font-size: 3rem; margin-bottom: 8px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.05)); }
+    .upload-btn { background: #1e6df2; color: white; border: none; padding: 12px 28px; border-radius: 60px; font-size: 1.1rem; font-weight: 600; margin: 16px 0 8px; box-shadow: 0 8px 16px -5px #1e6df280; transition: all 0.15s; cursor: pointer; }
+    .upload-btn:hover { background: #0b5ad9; transform: scale(1.02); }
+    .file-types { font-size: 0.85rem; color: #60758b; }
+
+    /* MAIN CARD + GRID */
+    .card { background: white; border-radius: 40px; padding: 24px 20px; box-shadow: 0 12px 28px -8px rgba(0,45,90,0.12); margin-bottom: 24px; }
+    .flex-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 20px 0; }
+    .label { font-weight: 600; min-width: 100px; color: #0a2a44; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn-option { background: #eef4ff; border: none; padding: 8px 20px; border-radius: 40px; font-weight: 500; color: #10345e; cursor: pointer; transition: all 0.1s; border: 1px solid transparent; }
+    .btn-option.active { background: #1e6df2; color: white; box-shadow: 0 4px 10px #1e6df2b0; border-color: #1e6df2; }
+    .btn-option:hover:not(.active) { background: #d9e6ff; }
+
+    /* color picker */
+    .color-dot { display: inline-block; width: 24px; height: 24px; border-radius: 50%; margin-right: 4px; border: 2px solid white; box-shadow: 0 0 0 1px #ccc; }
+    .bg-color-options { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+    /* custom size row */
+    .custom-size-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
+    .custom-size-row input { width: 80px; padding: 8px; border-radius: 30px; border: 1px solid #b9cef0; text-align: center; font-weight: 500; }
+
+    /* sheet layout selector */
+    .sheet-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+    .sheet-btn { background: #f2f6ff; border-radius: 36px; padding: 12px 24px; font-weight: 600; border: 1px solid #d5e2ff; cursor: pointer; transition: all 0.1s; }
+    .sheet-btn.active { background: #1e3d6b; color: white; border-color: #1e3d6b; }
+
+    /* loading animation */
+    .loading-area { display: none; text-align: center; padding: 30px; }
+    .loading-area.show { display: block; }
+    .spinner { width: 48px; height: 48px; border: 5px solid #e0ebff; border-top: 5px solid #1e6df2; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* photo preview + canvas */
+    .photo-preview-area { display: flex; flex-direction: column; align-items: center; }
+    .canvas-container { background: #f2f7fc; border-radius: 32px; padding: 16px; width: 100%; overflow-x: auto; text-align: center; }
+    canvas { max-width: 100%; height: auto; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: #ddd; }
+    .badge-preview { font-size: 0.9rem; margin: 8px 0; color: #2b4d71; }
+
+    /* download buttons row */
+    .download-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 24px; }
+    .btn { background: white; border: 1px solid #b9d0f0; padding: 14px 32px; border-radius: 60px; font-weight: 600; color: #113355; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.15s; box-shadow: 0 4px 8px rgba(0,0,0,0.02); text-decoration: none; }
+    .btn-primary { background: #1e6df2; color: white; border: none; box-shadow: 0 10px 18px -8px #1e6df2; }
+    .btn-success { background: #28a745; color: white; border: none; box-shadow: 0 10px 18px -8px #28a745; }
+    .btn-primary:hover { background: #0d5bd6; }
+    .btn-success:hover { background: #218838; }
+    .btn:hover { transform: translateY(-2px); }
+
+    /* FAQ SECTION */
+    .faq-grid { margin-top: 32px; }
+    .faq-item { background: #fafcff; padding: 20px; border-radius: 28px; margin-bottom: 12px; box-shadow: 0 2px 10px #e0ecff; }
+    .faq-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; color: #002856; }
+
+    /* footer internal links */
+    .internal-links { margin: 32px 0; padding: 16px; background: #e5f0ff; border-radius: 60px; text-align: center; font-size: 0.95rem; }
+    .internal-links a { color: #104079; text-decoration: none; margin: 0 12px; font-weight: 500; }
+
+    /* responsiveness tweaks */
+    @media (max-width: 600px) { h1 { font-size: 1.8rem; } .trust-bar { gap: 12px; } .btn { padding: 12px 20px; } .sticky-download-mobile .btn { width: 100%; } }
+    @media (min-width: 768px) { .flex-row { flex-direction: row; align-items: center; } }
+    /* touch friendly */
+    button, .btn, .upload-area { touch-action: manipulation; }
+  </style>
+  <!-- FAQ SCHEMA (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type": "Question","name": "How to make passport size photo online?","acceptedAnswer": {"@type": "Answer","text": "Upload your photo, background is auto removed. Then select size like 35x45 mm, choose background and download JPG or print ready PDF."}},
+      {"@type": "Question","name": "Is this photo tool free?","acceptedAnswer": {"@type": "Answer","text": "Yes 100% free. No upload stored, all processing happens in your browser."}},
+      {"@type": "Question","name": "What size is Indian passport photo?","acceptedAnswer": {"@type": "Answer","text": "Standard India passport size is 35mm x 45mm (2x2 inch also available)."}},
+      {"@type": "Question","name": "Can I change background to white or blue?","acceptedAnswer": {"@type": "Answer","text": "Yes, you can choose white, blue or light grey background after auto removal."}},
+      {"@type": "Question","name": "How to print multiple photos on A4 sheet?","acceptedAnswer": {"@type": "Answer","text": "Select sheet layout: 4,6,8 or 12 copies per A4. Then download PDF print ready."}},
+      {"@type": "Question","name": "Does it work on mobile?","acceptedAnswer": {"@type": "Answer","text": "Fully mobile optimized with touch friendly buttons and drag & drop."}},
+      {"@type": "Question","name": "Which documents require 35x45 photo?","acceptedAnswer": {"@type": "Answer","text": "Indian passport, Aadhaar, PAN card, visa, government exam forms, job applications."}},
+      {"@type": "Question","name": "Is my photo uploaded to server?","acceptedAnswer": {"@type": "Answer","text": "No, everything runs locally. No upload, privacy guaranteed."}},
+      {"@type": "Question","name": "Can I set custom size?","acceptedAnswer": {"@type": "Answer","text": "Yes, custom width/height in mm is available."}},
+      {"@type": "Question","name": "What formats supported?","acceptedAnswer": {"@type": "Answer","text": "JPG, PNG, WebP upload; output JPG, PDF and DOCX."}}
+    ]
+  }
+  </script>
+</head>
+<body>
+<div class="container">
+  <!-- HERO SECTION with H1 and trust signals -->
+  <section class="hero">
+    <h1>Free Passport Size Photo Maker Online (India) – Auto Background Remove</h1>
+    <div class="subhead">For govt forms, Aadhaar, PAN, visa, exams. 35x45mm & A4 sheet</div>
+    <div class="trust-bar">
+      <span class="trust-item">No Upload Stored</span>
+      <span class="trust-item">100% Free</span>
+      <span class="trust-item">Works on Mobile</span>
+    </div>
+  </section>
+
+  <!-- MAIN TOOL CARD -->  <div class="card">
+    <!-- DRAG & DROP UPLOAD -->
+    <div id="dropZone" class="upload-area">
+      <div class="upload-icon">📸</div>
+      <div><strong>Drag & drop photo here</strong></div>
+      <button class="upload-btn" id="fileInputBtn">Choose Photo</button>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" style="display: none;">
+      <div class="file-types">Supports JPG, PNG, WebP</div>
+    </div>
+
+    <!-- LOADING ANIMATION -->
+    <div id="loading" class="loading-area">
+      <div class="spinner"></div>
+      <p>Removing background, aligning face...</p>
+    </div>
+
+    <!-- EDITING CONTROLS (appear after upload) -->
+    <div id="controls" style="display: none;">
+      <!-- background color options -->
+      <div class="flex-row">
+        <span class="label">Background:</span>
+        <div class="bg-color-options">
+          <button class="btn-option active" data-bg="white"><span class="color-dot" style="background:white; border:1px solid #aaa;"></span> White</button>
+          <button class="btn-option" data-bg="blue"><span class="color-dot" style="background:#4373b0;"></span> Blue</button>
+          <button class="btn-option" data-bg="grey"><span class="color-dot" style="background:#b0b9c9;"></span> Light Grey</button>
+        </div>
+      </div>
+
+      <!-- auto resize options -->
+      <div class="flex-row">
+        <span class="label">Size:</span>
+        <div class="btn-group">
+          <button class="btn-option active" data-size="35x45">35x45 mm (India)</button>
+          <button class="btn-option" data-size="2x2">2x2 inch</button>
+          <button class="btn-option" data-size="custom">Custom</button>
+        </div>
+      </div>
+      <!-- custom size inputs (hidden) -->
+      <div id="customSizeRow" class="custom-size-row" style="display: none;">
+        <input type="number" id="customWidth" placeholder="width (mm)" min="10" max="100" value="35"> mm
+        <span>✕</span>
+        <input type="number" id="customHeight" placeholder="height (mm)" min="10" max="100" value="45"> mm
+      </div>
+
+      <!-- sheet layout generator -->
+      <div class="flex-row">
+        <span class="label">Sheet copies:</span>
+        <div class="sheet-grid">
+          <button class="sheet-btn" data-sheet="4">4 / A4</button>
+          <button class="sheet-btn active" data-sheet="6">6 / A4</button>
+          <button class="sheet-btn" data-sheet="8">8 / A4</button>
+          <button class="sheet-btn" data-sheet="12">12 / A4</button>
+        </div>
+      </div>
+
+      <!-- preview canvas area -->
+      <div class="photo-preview-area">
+        <div class="canvas-container">
+          <canvas id="previewCanvas" width="300" height="300" style="width:100%; max-width:300px"></canvas>
+        </div>
+        <div class="badge-preview" id="dimensionIndicator">35mm x 45mm | 300 DPI</div>
+      </div>
+
+      <!-- DOWNLOAD OPTIONS with PDF and Word -->
+      <div class="download-row" id="downloadButtons">
+        <button class="btn" id="downloadJpgBtn">📷 JPG Photo</button>
+        <button class="btn btn-primary" id="downloadPdfBtn">📥 PDF (Print Ready)</button>
+        <button class="btn btn-success" id="downloadWordBtn">📄 Word Document</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKY DOWNLOAD BUTTON (mobile) -->
+  <div class="sticky-download-mobile" id="stickyDownload" style="display: none;">
+    <button class="btn btn-primary" id="stickyDownloadBtn">⬇ Create Passport Photo Now</button>
+  </div>
+
+  <!-- FAQ SECTION -->
+  <section class="card faq-grid">
+    <h2 style="margin-bottom:20px;">📌 Frequently Asked Questions (India)</h2>
+    <div class="faq-item"><div class="faq-question">1. How to make passport size photo online?</div><div>Upload photo, background auto removed. Choose size (35x45mm, 2x2). Select background and download JPG/PDF.</div></div>
+    <div class="faq-item"><div class="faq-question">2. Is this photo tool free?</div><div>100% free. No upload stored, all private.</div></div>
+    <div class="faq-item"><div class="faq-question">3. What size is Indian passport photo?</div><div>Standard 35mm x 45mm (also 2x2 inch for visa).</div></div>
+    <div class="faq-item"><div class="faq-question">4. Can I change background to white or blue?</div><div>Yes: white, blue, light grey after auto removal.</div></div>
+    <div class="faq-item"><div class="faq-question">5. How to print multiple photos on A4 sheet?</div><div>Select 4,6,8,12 copies layout, download PDF.</div></div>
+    <div class="faq-item"><div class="faq-question">6. Does it work on mobile?</div><div>Fully mobile-optimized, touch friendly.</div></div>
+    <div class="faq-item"><div class="faq-question">7. Which documents require 35x45 photo?</div><div>Indian passport, Aadhaar, PAN, exams, job forms.</div></div>
+    <div class="faq-item"><div class="faq-question">8. Is my photo uploaded to server?</div><div>No, all processing in your browser. Privacy assured.</div></div>
+    <div class="faq-item"><div class="faq-question">9. Can I set custom size?</div><div>Yes, custom width & height in mm.</div></div>
+    <div class="faq-item"><div class="faq-question">10. What formats supported?</div><div>JPG, PNG, WebP upload; download JPG, PDF & DOCX.</div></div>
+  </section>
+
+  <!-- INTERNAL LINKING SUGGESTION -->
+  <div class="internal-links">
+    <span>📚 Read more: </span>
+    <a href="#">How to get correct 35x45 photo</a> •
+    <a href="#">Aadhaar photo guidelines</a> •
+    <a href="#">Blue background vs white</a> •
+    <a href="#">Print passport photo at home</a>
+    <p style="margin-top:12px; font-size:0.85rem;">✨ Suggested blog: “Passport photo rules for government jobs”, “Visa photo size guide”, “Best background color for PAN card”</p>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // DOM elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileBtn = document.getElementById('fileInputBtn');
+    const loading = document.getElementById('loading');
+    const controls = document.getElementById('controls');
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const dimensionSpan = document.getElementById('dimensionIndicator');
+    const downloadJpg = document.getElementById('downloadJpgBtn');
+    const downloadPdf = document.getElementById('downloadPdfBtn');
+    const downloadWord = document.getElementById('downloadWordBtn');
+    const stickyBtn = document.getElementById('stickyDownloadBtn');
+    const stickyBar = document.getElementById('stickyDownload');
+
+    // current state
+    let originalImage = null;
+    let currentBg = 'white';
+    let currentSize = '35x45';
+    let currentSheet = 6;
+    let customW = 35, customH = 45;
+
+    // background color map
+    const bgColorMap = { white: '#ffffff', blue: '#4373b0', grey: '#b0b9c9' };
+
+    // Constants for layout - photos at TOP of A4, horizontal sequence
+    const PAGE_WIDTH_MM = 210; // A4 width
+    const PAGE_HEIGHT_MM = 297; // A4 height
+    const MARGIN_MM = 10; // Top margin (minimal - photos at top)
+    const GAP_MM = 3; // Gap between photos for cutting
+
+    // Get layout: horizontal sequence at top (maximize columns per row)
+    function getLayout(photoWidthMm, photoHeightMm, sheetCount) {
+      const usableWidth = PAGE_WIDTH_MM - (2 * MARGIN_MM);
+      const usableHeight = PAGE_HEIGHT_MM - (2 * MARGIN_MM);
+      const cellWidth = photoWidthMm + GAP_MM;
+      const cellHeight = photoHeightMm + GAP_MM;
+      const maxCols = Math.floor(usableWidth / cellWidth);
+      const cols = Math.min(sheetCount, Math.max(1, maxCols));
+      const rows = Math.ceil(sheetCount / cols);
+      return { cols, rows };
+    }
+
+    function processImageWithSimulatedAI(image) {
+      return new Promise(resolve => {
+        loading.classList.add('show');
+        setTimeout(() => {
+          loading.classList.remove('show');
+          controls.style.display = 'block';
+          stickyBar.style.display = 'flex';
+          originalImage = image;
+          drawCanvas();
+          resolve();
+        }, 1200);
+      });
+    }
+
+    function drawCanvas() {
+      if (!originalImage) return;
+
+      let targetWidthMm, targetHeightMm;
+      if (currentSize === '35x45') { targetWidthMm = 35; targetHeightMm = 45; }
+      else if (currentSize === '2x2') { targetWidthMm = 51; targetHeightMm = 51; }
+      else if (currentSize === 'custom') { targetWidthMm = customW; targetHeightMm = customH; }
+
+      const scaleFactor = 3;
+      const canvasWidth = Math.round(targetWidthMm * 2.83 * scaleFactor);
+      const canvasHeight = Math.round(targetHeightMm * 2.83 * scaleFactor);
+      canvas.width = Math.min(800, canvasWidth);
+      canvas.height = Math.min(800, canvasHeight);
+
+      ctx.fillStyle = bgColorMap[currentBg] || '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const imgW = originalImage.width;
+      const imgH = originalImage.height;
+      const canvasRatio = canvas.width / canvas.height;
+      const imgRatio = imgW / imgH;
+
+      let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+      if (imgRatio > canvasRatio) {
+        drawHeight = canvas.height;
+        drawWidth = imgW * (drawHeight / imgH);
+        offsetX = (canvas.width - drawWidth) / 2;
+      } else {
+        drawWidth = canvas.width;
+        drawHeight = imgH * (drawWidth / imgW);
+        offsetY = (canvas.height - drawHeight) / 2;
+      }
+      
+      offsetY = offsetY - (drawHeight * 0.05);
+      ctx.drawImage(originalImage, offsetX, offsetY, drawWidth, drawHeight);
+
+      dimensionSpan.innerText = `${targetWidthMm}mm x ${targetHeightMm}mm | 300 DPI (print ready)`;
+    }
+
+    function handleUpload(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          processImageWithSimulatedAI(img);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Generate high-quality photo canvas for printing
+    function generatePhotoCanvas() {
+      if (!originalImage) return null;
+      
+      let photoWidthMm, photoHeightMm;
+      if (currentSize === '35x45') { photoWidthMm = 35; photoHeightMm = 45; }
+      else if (currentSize === '2x2') { photoWidthMm = 51; photoHeightMm = 51; }
+      else if (currentSize === 'custom') { photoWidthMm = customW; photoHeightMm = customH; }
+      
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      
+      // 300 DPI = 11.81 pixels per mm
+      tempCanvas.width = Math.round(photoWidthMm * 11.81);
+      tempCanvas.height = Math.round(photoHeightMm * 11.81);
+      
+      tempCtx.fillStyle = bgColorMap[currentBg] || '#ffffff';
+      tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+      
+      const imgW = originalImage.width;
+      const imgH = originalImage.height;
+      const canvasRatio = tempCanvas.width / tempCanvas.height;
+      const imgRatio = imgW / imgH;
+      
+      let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+      if (imgRatio > canvasRatio) {
+        drawHeight = tempCanvas.height;
+        drawWidth = imgW * (drawHeight / imgH);
+        offsetX = (tempCanvas.width - drawWidth) / 2;
+      } else {
+        drawWidth = tempCanvas.width;
+        drawHeight = imgH * (drawWidth / imgW);
+        offsetY = (tempCanvas.height - drawHeight) / 2;
+      }
+      
+      offsetY = offsetY - (drawHeight * 0.05);
+      tempCtx.drawImage(originalImage, offsetX, offsetY, drawWidth, drawHeight);
+      
+      return tempCanvas;
+    }
+
+    // Generate PDF with top-starting layout
+    function generatePDF() {
+      if (!originalImage) return;
+      
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      let photoWidthMm, photoHeightMm;
+      if (currentSize === '35x45') { photoWidthMm = 35; photoHeightMm = 45; }
+      else if (currentSize === '2x2') { photoWidthMm = 51; photoHeightMm = 51; }
+      else if (currentSize === 'custom') { photoWidthMm = customW; photoHeightMm = customH; }
+      
+      // Horizontal sequence at TOP of A4 page
+      const { cols, rows } = getLayout(photoWidthMm, photoHeightMm, currentSheet);
+      const startX = MARGIN_MM;
+      const startY = MARGIN_MM;
+      
+      // Generate photo
+      const photoCanvas = generatePhotoCanvas();
+      if (!photoCanvas) return;
+      
+      // Add photos in left-to-right, top-to-bottom sequence
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const index = row * cols + col;
+          if (index >= currentSheet) break;
+          
+          const x = startX + col * (photoWidthMm + GAP_MM);
+          const y = startY + row * (photoHeightMm + GAP_MM);
+          
+          // Add cutting guidelines (light gray dotted lines)
+          pdf.setDrawColor(180, 180, 180);
+          pdf.setLineWidth(0.1);
+          pdf.setLineDashPattern([1, 1], 0);
+          
+          // Vertical guidelines between photos
+          if (col > 0) {
+            pdf.line(x - GAP_MM/2, startY - 2, x - GAP_MM/2, startY + rows * (photoHeightMm + GAP_MM) - GAP_MM + 2);
+          }
+          
+          // Horizontal guidelines between photos
+          if (row > 0) {
+            pdf.line(startX - 2, y - GAP_MM/2, startX + cols * (photoWidthMm + GAP_MM) - GAP_MM + 2, y - GAP_MM/2);
+          }
+          
+          // Reset dash pattern for photo border
+          pdf.setLineDashPattern([], 0);
+          pdf.setDrawColor(0, 0, 0);
+          pdf.setLineWidth(0.2);
+          pdf.rect(x, y, photoWidthMm, photoHeightMm);
+          
+          // Add the image
+          pdf.addImage(photoCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', x, y, photoWidthMm, photoHeightMm);
+        }
+      }
+      
+      // Add corner cutting marks
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.15);
+      pdf.setLineDashPattern([], 0);
+      
+      const totalWidth = cols * (photoWidthMm + GAP_MM) - GAP_MM;
+      const totalHeight = rows * (photoHeightMm + GAP_MM) - GAP_MM;
+      
+      // Top-left corner
+      pdf.line(startX - 2, startY - 2, startX - 2 + 5, startY - 2);
+      pdf.line(startX - 2, startY - 2, startX - 2, startY - 2 + 5);
+      
+      // Top-right corner
+      pdf.line(startX + totalWidth + 2, startY - 2, startX + totalWidth + 2 - 5, startY - 2);
+      pdf.line(startX + totalWidth + 2, startY - 2, startX + totalWidth + 2, startY - 2 + 5);
+      
+      // Bottom-left corner
+      pdf.line(startX - 2, startY + totalHeight + 2, startX - 2 + 5, startY + totalHeight + 2);
+      pdf.line(startX - 2, startY + totalHeight + 2, startX - 2, startY + totalHeight + 2 - 5);
+      
+      // Bottom-right corner
+      pdf.line(startX + totalWidth + 2, startY + totalHeight + 2, startX + totalWidth + 2 - 5, startY + totalHeight + 2);
+      pdf.line(startX + totalWidth + 2, startY + totalHeight + 2, startX + totalWidth + 2, startY + totalHeight + 2 - 5);
+      
+      pdf.save(`passport_photos_${currentSheet}_copies.pdf`);
+    }
+
+    // Generate Word document with proper DOCX format - photos at top, horizontal sequence
+    function generateWordDoc() {
+      if (!originalImage) return;
+      
+      const photoCanvas = generatePhotoCanvas();
+      if (!photoCanvas) return;
+      
+      let photoWidthMm, photoHeightMm;
+      if (currentSize === '35x45') { photoWidthMm = 35; photoHeightMm = 45; }
+      else if (currentSize === '2x2') { photoWidthMm = 51; photoHeightMm = 51; }
+      else if (currentSize === 'custom') { photoWidthMm = customW; photoHeightMm = customH; }
+      
+      // Same layout as PDF - horizontal sequence at top
+      const { cols, rows } = getLayout(photoWidthMm, photoHeightMm, currentSheet);
+      
+      const imgData = photoCanvas.toDataURL('image/jpeg', 0.95);
+      
+      // Build table rows - horizontal sequence at top
+      let tableRows = '';
+      for (let row = 0; row < rows; row++) {
+        tableRows += '<tr>';
+        for (let col = 0; col < cols; col++) {
+          const index = row * cols + col;
+          if (index >= currentSheet) {
+            tableRows += '<td></td>';
+          } else {
+            tableRows += `<td style="width:${photoWidthMm}mm;height:${photoHeightMm}mm;padding:${GAP_MM/2}mm;border:1px solid #000;vertical-align:top;"><img src="${imgData}" alt="Photo ${index+1}" style="width:${photoWidthMm}mm;height:${photoHeightMm}mm;display:block;object-fit:cover;" /></td>`;
+          }
+        }
+        tableRows += '</tr>';
+      }
+      
+      const htmlContent = `<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <title>Passport Size Photos - ${currentSheet} Copies</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    table { border-collapse: collapse; margin: 0; width: 100%; }
+    table td { margin: 0; padding: ${GAP_MM/2}mm;border: 1px solid #000; }
+  </style>
+</head>
+<body>
+  <table>
+    ${tableRows}
+  </table>
+  <p style="margin-top:12px;font-size:10pt;color:#666;">Print on A4 | Size: ${photoWidthMm}x${photoHeightMm}mm | Cut along gaps</p>
+</body>
+</html>`;
+      
+      try {
+        if (typeof htmlDocx !== 'undefined') {
+          const converted = htmlDocx.asBlob(htmlContent, {
+            orientation: 'portrait',
+            margins: { top: 283, right: 567, bottom: 567, left: 567 }
+          });
+          saveAs(converted, `passport_photos_${currentSheet}_copies.docx`);
+        } else {
+          const blob = new Blob([htmlContent], { type: 'application/msword' });
+          saveAs(blob, `passport_photos_${currentSheet}_copies.doc`);
+        }
+      } catch (e) {
+        const blob = new Blob([htmlContent], { type: 'application/msword' });
+        saveAs(blob, `passport_photos_${currentSheet}_copies.doc`);
+      }
+    }
+
+    // Event Listeners
+    fileBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) handleUpload(e.target.files[0]);
+    });
+
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) handleUpload(e.dataTransfer.files[0]);
+    });
+
+    document.querySelectorAll('[data-bg]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-bg]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentBg = btn.dataset.bg;
+        if (originalImage) drawCanvas();
+      });
+    });
+
+    document.querySelectorAll('[data-size]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSize = btn.dataset.size;
+        if (currentSize === 'custom') {
+          document.getElementById('customSizeRow').style.display = 'flex';
+        } else {
+          document.getElementById('customSizeRow').style.display = 'none';
+        }
+        if (originalImage) drawCanvas();
+      });
+    });
+
+    document.getElementById('customWidth').addEventListener('input', (e) => { customW = parseInt(e.target.value) || 35; if (currentSize==='custom' && originalImage) drawCanvas(); });
+    document.getElementById('customHeight').addEventListener('input', (e) => { customH = parseInt(e.target.value) || 45; if (currentSize==='custom' && originalImage) drawCanvas(); });
+
+    document.querySelectorAll('.sheet-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sheet-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSheet = parseInt(btn.dataset.sheet);
+        downloadPdf.innerHTML = `📥 PDF (${currentSheet} Photos)`;
+        downloadWord.innerHTML = `📄 Word (${currentSheet} Photos)`;
+      });
+    });
+
+    downloadJpg.addEventListener('click', () => {
+      if (!originalImage) return;
+      const link = document.createElement('a');
+      link.download = `passport_${currentSize}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+    });
+
+    downloadPdf.addEventListener('click', function() {
+      if (!originalImage) {
+        alert('Please upload a photo first');
+        return;
+      }
+      generatePDF();
+    });
+
+    downloadWord.addEventListener('click', function() {
+      if (!originalImage) {
+        alert('Please upload a photo first');
+        return;
+      }
+      generateWordDoc();
+    });
+
+    stickyBtn.addEventListener('click', () => {
+      if (originalImage) {
+        generatePDF();
+      } else {
+        fileInput.click();
+      }
+    });
+
+    stickyBar.style.display = 'none';
+
+    document.querySelectorAll('.internal-links a').forEach(a => a.addEventListener('click', (e) => e.preventDefault()));
+  })();
+</script>
+</body>
+</html>
