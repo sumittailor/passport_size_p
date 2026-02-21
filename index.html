@@ -278,16 +278,21 @@
     const MARGIN_MM = 10; // Top margin (minimal - photos at top)
     const GAP_MM = 3; // Gap between photos for cutting
 
-    // Get layout: horizontal sequence at top (maximize columns per row)
+    // Get layout: 6 photos in 1 row when sheet=6; else horizontal at top
     function getLayout(photoWidthMm, photoHeightMm, sheetCount) {
+      if (sheetCount === 6) return { cols: 6, rows: 1 };
       const usableWidth = PAGE_WIDTH_MM - (2 * MARGIN_MM);
-      const usableHeight = PAGE_HEIGHT_MM - (2 * MARGIN_MM);
       const cellWidth = photoWidthMm + GAP_MM;
-      const cellHeight = photoHeightMm + GAP_MM;
       const maxCols = Math.floor(usableWidth / cellWidth);
       const cols = Math.min(sheetCount, Math.max(1, maxCols));
       const rows = Math.ceil(sheetCount / cols);
       return { cols, rows };
+    }
+
+    // Gap for layout: 0 when 6 in one row so 6×35mm fits on A4
+    function getGapMm(photoWidthMm, cols, sheetCount) {
+      if (sheetCount === 6 && cols === 6) return 0;
+      return GAP_MM;
     }
 
     function processImageWithSimulatedAI(image) {
@@ -413,37 +418,32 @@
       else if (currentSize === '2x2') { photoWidthMm = 51; photoHeightMm = 51; }
       else if (currentSize === 'custom') { photoWidthMm = customW; photoHeightMm = customH; }
       
-      // Horizontal sequence at TOP of A4 page
       const { cols, rows } = getLayout(photoWidthMm, photoHeightMm, currentSheet);
+      const gapMm = getGapMm(photoWidthMm, cols, currentSheet);
       const startX = MARGIN_MM;
       const startY = MARGIN_MM;
       
-      // Generate photo
       const photoCanvas = generatePhotoCanvas();
       if (!photoCanvas) return;
       
-      // Add photos in left-to-right, top-to-bottom sequence
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
           const index = row * cols + col;
           if (index >= currentSheet) break;
           
-          const x = startX + col * (photoWidthMm + GAP_MM);
-          const y = startY + row * (photoHeightMm + GAP_MM);
+          const x = startX + col * (photoWidthMm + gapMm);
+          const y = startY + row * (photoHeightMm + gapMm);
           
           // Add cutting guidelines (light gray dotted lines)
           pdf.setDrawColor(180, 180, 180);
           pdf.setLineWidth(0.1);
           pdf.setLineDashPattern([1, 1], 0);
           
-          // Vertical guidelines between photos
-          if (col > 0) {
-            pdf.line(x - GAP_MM/2, startY - 2, x - GAP_MM/2, startY + rows * (photoHeightMm + GAP_MM) - GAP_MM + 2);
+          if (col > 0 && gapMm > 0) {
+            pdf.line(x - gapMm/2, startY - 2, x - gapMm/2, startY + rows * (photoHeightMm + gapMm) - gapMm + 2);
           }
-          
-          // Horizontal guidelines between photos
-          if (row > 0) {
-            pdf.line(startX - 2, y - GAP_MM/2, startX + cols * (photoWidthMm + GAP_MM) - GAP_MM + 2, y - GAP_MM/2);
+          if (row > 0 && gapMm > 0) {
+            pdf.line(startX - 2, y - gapMm/2, startX + cols * (photoWidthMm + gapMm) - gapMm + 2, y - gapMm/2);
           }
           
           // Reset dash pattern for photo border
@@ -462,8 +462,8 @@
       pdf.setLineWidth(0.15);
       pdf.setLineDashPattern([], 0);
       
-      const totalWidth = cols * (photoWidthMm + GAP_MM) - GAP_MM;
-      const totalHeight = rows * (photoHeightMm + GAP_MM) - GAP_MM;
+      const totalWidth = cols * (photoWidthMm + gapMm) - gapMm;
+      const totalHeight = rows * (photoHeightMm + gapMm) - gapMm;
       
       // Top-left corner
       pdf.line(startX - 2, startY - 2, startX - 2 + 5, startY - 2);
@@ -484,7 +484,7 @@
       pdf.save(`passport_photos_${currentSheet}_copies.pdf`);
     }
 
-    // Generate Word document with proper DOCX format - photos at top, horizontal sequence
+    // Generate Word document - only images, same size, exact format (no table)
     function generateWordDoc() {
       if (!originalImage) return;
       
@@ -496,24 +496,22 @@
       else if (currentSize === '2x2') { photoWidthMm = 51; photoHeightMm = 51; }
       else if (currentSize === 'custom') { photoWidthMm = customW; photoHeightMm = customH; }
       
-      // Same layout as PDF - horizontal sequence at top
       const { cols, rows } = getLayout(photoWidthMm, photoHeightMm, currentSheet);
-      
+      const gapMm = getGapMm(photoWidthMm, cols, currentSheet);
       const imgData = photoCanvas.toDataURL('image/jpeg', 0.95);
       
-      // Build table rows - horizontal sequence at top
-      let tableRows = '';
+      // Only images, no table - same photo same size, exact format for Word
+      const imgStyle = `width:${photoWidthMm}mm;height:${photoHeightMm}mm;display:inline-block;vertical-align:top;object-fit:cover;`;
+      let bodyContent = '';
       for (let row = 0; row < rows; row++) {
-        tableRows += '<tr>';
+        bodyContent += `<div style="margin-bottom:${row < rows - 1 ? gapMm : 0}mm;">`;
         for (let col = 0; col < cols; col++) {
           const index = row * cols + col;
-          if (index >= currentSheet) {
-            tableRows += '<td></td>';
-          } else {
-            tableRows += `<td style="width:${photoWidthMm}mm;height:${photoHeightMm}mm;padding:${GAP_MM/2}mm;border:1px solid #000;vertical-align:top;"><img src="${imgData}" alt="Photo ${index+1}" style="width:${photoWidthMm}mm;height:${photoHeightMm}mm;display:block;object-fit:cover;" /></td>`;
-          }
+          if (index >= currentSheet) break;
+          const marginRight = col < cols - 1 ? gapMm : 0;
+          bodyContent += `<img src="${imgData}" alt="Photo ${index+1}" style="${imgStyle}margin-right:${marginRight}mm;" />`;
         }
-        tableRows += '</tr>';
+        bodyContent += '</div>';
       }
       
       const htmlContent = `<!DOCTYPE html>
@@ -523,15 +521,11 @@
   <title>Passport Size Photos - ${currentSheet} Copies</title>
   <style>
     body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    table { border-collapse: collapse; margin: 0; width: 100%; }
-    table td { margin: 0; padding: ${GAP_MM/2}mm;border: 1px solid #000; }
+    img { width: ${photoWidthMm}mm; height: ${photoHeightMm}mm; }
   </style>
 </head>
 <body>
-  <table>
-    ${tableRows}
-  </table>
-  <p style="margin-top:12px;font-size:10pt;color:#666;">Print on A4 | Size: ${photoWidthMm}x${photoHeightMm}mm | Cut along gaps</p>
+${bodyContent}
 </body>
 </html>`;
       
